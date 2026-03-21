@@ -1,16 +1,46 @@
-# loginout
+# JediTravels — Hotel Booking Mobile App
+A full-stack cross-platform mobile application built with Flutter and Firebase.
+Users can browse hotels, make bookings, and complete payments — all from
+a single app that runs on both Android and iOS.
 
-A new Flutter project.
+## Features
+- **Authentication** — Email/password login, Google Sign-In, password reset (Firebase Auth)
+- **Hotel Discovery** — Browse hotels with images, pricing, ratings, and amenities
+- **Real-time Booking** — Select check-in/check-out dates and book rooms instantly
+- **Payment Integration** — Secure payments via Razorpay payment gateway
+- **User Profiles** — Editable profile with photo upload
+- **Offers & Promotions** — Dynamic promotional banners with discount codes
 
-## Getting Started
+## Tech Stack
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Flutter (Dart) |
+| Authentication | Firebase Auth |
+| Database | Cloud Firestore (NoSQL) |
+| Payments | Razorpay API |
+| State Management | StatefulWidget |
+| Navigation | MaterialPageRoute |
 
-This project is a starting point for a Flutter application.
+## Architecture
+Multi-screen app with route-based navigation. Firebase handles all
+backend operations — no custom server required. Razorpay handles
+PCI-compliant payment processing.
 
-A few resources to get you started if this is your first Flutter project:
+## Screenshots
+[Add 3-4 screenshots from your appendix here]
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+## What I Learned
+- Integrating third-party payment APIs (Razorpay)
+- Real-time NoSQL database design with Firestore
+- Cross-platform mobile development with a single codebase
+- Firebase Authentication flows including Google OAuth
+- Flutter widget architecture and state management
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Setup
+```bash
+git clone https://github.com/Viswanadareddy/JediTravels-main
+cd JediTravels-main
+flutter pub get
+flutter run
+```
+*Note: Requires Firebase config file (not included for security)*
