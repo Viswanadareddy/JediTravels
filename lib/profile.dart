@@ -132,6 +132,23 @@ class _ProfileState extends State<Profile> {
                           Border.all(width: 1.0, color: Constants.textColor)),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 4),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: (){
+                      Navigator.pushNamed(context, 'booking_history');
+                    },
+                    icon:  const Icon(Icons.history),
+                    label: const Text('My Bookings'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Constants.background,
+                      foregroundColor: Constants.textColor,
+                    ),
+                    ),
+                ),
+                ),
               Expanded(
                 child: Align(
                   alignment: Alignment.bottomRight,

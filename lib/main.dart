@@ -1,6 +1,7 @@
 /* This is the start point of the Flutter Flow. 
 Here we are importing all the necessary screens for the Flutter flow*/
 import 'package:flutter/material.dart';
+import 'package:loginout/booking_history.dart';
 //import 'package:loginout/payments.dart';
 import 'package:loginout/screens/home/home_screen.dart';
 //import 'package:loginout/splashscreen.dart';
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
         'about': (context) => About(),
         'home': (context) => HomeScreen(),
         'terms_and_conditions': (context) => TermsandConditionsPage(),
+        'booking_history':(context) => BookingHistoryScreen(),
       },
       home: Onbording(),
     );
