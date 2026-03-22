@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-//import 'package:loginout/constants.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:loginout/constants.dart';
 import 'package:loginout/hotel_details.dart';
 
 class Popular extends StatelessWidget {
@@ -11,37 +10,79 @@ class Popular extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: List.generate(
-          popular_hotels.length,
-          (index) => GestureDetector(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HotelDetailsPage(
-                          image: popular_hotels[index].image,
-                          hotelname: popular_hotels[index].hotelname,
-                          location: popular_hotels[index].location,
-                          price: popular_hotels[index].price.toString(),
-                          rating: popular_hotels[index].rating)));
-            },
-            child: Padding(
-              padding: EdgeInsets.only(right: 20, left: index == 0 ? 20 : 0),
-              child: PopularCard(
-                  image: popular_hotels[index].image,
-                  hotelname: popular_hotels[index].hotelname,
-                  location: popular_hotels[index].location,
-                  price: popular_hotels[index].price),
+  return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('hotels')
+          .where('category', isEqualTo: 'popular')
+          .snapshots(),
+      builder: (context, snapshot) {
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 170,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return const SizedBox(
+            height: 170,
+            child: Center(child: Text('Could not load hotels')),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SizedBox(
+            height: 170,
+            child: Center(child: Text('No hotels available')),
+          );
+        }
+
+        final hotels = snapshot.data!.docs;
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: List.generate(
+              hotels.length,
+              (index) {
+                final hotel = hotels[index].data() as Map<String, dynamic>;
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HotelDetailsPage(
+                          image: hotel['image'] ?? '',
+                          hotelname: hotel['name'] ?? '',
+                          location: hotel['location'] ?? '',
+                          price: hotel['price'].toString(),
+                          rating: hotel['rating'] ?? '0',
+                        ),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: 20,
+                      left: index == 0 ? 20 : 0,
+                    ),
+                    child: PopularCard(
+                      image: hotel['image'] ?? '',
+                      hotelname: hotel['name'] ?? '',
+                      location: hotel['location'] ?? '',
+                      price: hotel['price'] ?? 0,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
-}
+}  
 
 class PopularCard extends StatelessWidget {
   const PopularCard({
