@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 //import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:loginout/constants.dart';
 
 class HeaderWithSearchBox extends StatelessWidget {
@@ -37,7 +37,7 @@ class HeaderWithSearchBox extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 Text(
-                  'Welcome user!',
+                  'Welcome, ${FirebaseAuth.instance.currentUser?.displayName ?? 'there'}!',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         color: Constants.textColor,
                         fontWeight: FontWeight.w500,

@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'constants.dart';
 import 'datetime_picker_widget.dart';
 
 class PaymentsPage extends StatefulWidget {
-  const PaymentsPage({Key? key, required this.price}) : super(key: key);
+  const PaymentsPage({
+    Key? key, 
+    required this.price,
+    required this.hotelname,
+    }) : super(key: key);
   final String price;
+  final String hotelname;
 
   @override
   _PaymentsPageState createState() => _PaymentsPageState();
@@ -16,6 +22,8 @@ class PaymentsPage extends StatefulWidget {
 class _PaymentsPageState extends State<PaymentsPage> {
   late Razorpay razerPay;
   TextEditingController textEditingController = new TextEditingController();
+  DateTime? checkInDateTime;
+  DateTime? checkOutDateTime;
 
   @override
   void initState() {
@@ -50,10 +58,35 @@ class _PaymentsPageState extends State<PaymentsPage> {
     }
   }
 
-  void handlerPaymentSuccess(PaymentSuccessResponse response) {
+  void handlerPaymentSuccess(PaymentSuccessResponse response) async{
+    //Previous version
+    /*Navigator.pop(context);
     Navigator.pop(context);
-    Navigator.pop(context);
-    Fluttertoast.showToast(msg: 'Hotel Booked');
+    Fluttertoast.showToast(msg: 'Hotel Booked');*/
+    try
+    {
+      final user= FirebaseAuth.instance.currentUser;
+      if (user!=null){
+        await FirebaseFirestore.instance
+        .collection('bookings')
+        .add({
+          'userId': user.uid,
+          'hotelName': widget.hotelname,
+          'price' : widget.price,
+          'paymentId':response.paymentId,
+          'bookedAt':DateTime.now().toIso8601String(),
+          'checkIn':checkInDateTime?.toIso8601String(),
+          'checkOut':checkOutDateTime?.toIso8601String(),
+        });
+      }
+    } catch(e){
+      print('Booking save failed: $e');
+    }
+    if (mounted){
+      Navigator.pop(context);
+      Navigator.pop(context);
+      Fluttertoast.showToast(msg: 'Hotel Booked Successfully!');
+    }
   }
 
   void handlerPaymentError(PaymentFailureResponse response) {

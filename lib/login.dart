@@ -116,7 +116,13 @@ class _LoginState extends State<Login> {
                           );
                         }
                       } catch (e) {
-                        print(e);
+                        if (mounted){
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content : Text(e.toString()),
+                            backgroundColor: Colors.red,
+                            ),
+                           );
+                        }
                       }
                     },
                     minWidth: 200.0,

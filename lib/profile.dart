@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loginout/start.dart';
 import 'constants.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:loginout/constants.dart';
+//import 'package:google_fonts/google_fonts.dart';
+//import 'package:loginout/constants.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);

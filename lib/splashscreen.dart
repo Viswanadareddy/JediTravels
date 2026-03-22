@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loginout/onboarding.dart';
-import 'package:loginout/constants.dart';
+//import 'package:loginout/constants.dart';
 
 class SplashScreen extends StatefulWidget {
   SplashScreen({Key? key}) : super(key: key);

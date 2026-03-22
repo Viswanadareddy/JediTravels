@@ -1,9 +1,9 @@
 /* This is the start point of the Flutter Flow. 
 Here we are importing all the necessary screens for the Flutter flow*/
 import 'package:flutter/material.dart';
-import 'package:loginout/payments.dart';
+//import 'package:loginout/payments.dart';
 import 'package:loginout/screens/home/home_screen.dart';
-import 'package:loginout/splashscreen.dart';
+//import 'package:loginout/splashscreen.dart';
 import 'about.dart';
 import 'dashboard.dart';
 import 'start.dart';
@@ -30,6 +30,20 @@ class MyApp extends StatelessWidget {
       title: 'Hotel Booking',
       debugShowCheckedModeBanner: false,
       scrollBehavior: MyScrollBehaviour(),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF77D970),
+          brightness: Brightness.light,),
+          useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF77D970),
+          brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+      ),
+      themeMode: ThemeMode.system,
       routes: {
         'settings': (context) => Setting(),
         'dashboard': (context) => Dashboard(),

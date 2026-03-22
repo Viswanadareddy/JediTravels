@@ -147,6 +147,7 @@ class _RegisterState extends State<Register> {
                         final newUser =
                             await _auth.createUserWithEmailAndPassword(
                                 email: email, password: password);
+                                await newUser.user?.updateDisplayName(name);
                         await createnewuser(name, email);
                         if (newUser.user != null) {
                           Navigator.pushAndRemoveUntil(

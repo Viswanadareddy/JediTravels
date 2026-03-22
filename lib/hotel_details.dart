@@ -206,6 +206,7 @@ class HotelDetailsPage extends StatelessWidget {
                                 MaterialPageRoute(
                                     builder: (context) => PaymentsPage(
                                           price: price,
+                                          hotelname: hotelname,
                                         )));
                           },
                         ),
