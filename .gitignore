@@ -1,0 +1,30 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.g.dart
+
+# Android
+android/local.properties
+android/key.properties
+android/.gradle/
+android/app/google-services.json
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/GoogleService-Info.plist
+
+# IDE
+.idea/
+.vscode/settings.json
+*.iml
+
+# Environment / secrets
+.env
+secrets.dart
+api_keys.dart
