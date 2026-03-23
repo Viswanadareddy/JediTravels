@@ -7,7 +7,9 @@ class TermsandConditionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text(
           'Terms and Conditions',
@@ -15,17 +17,19 @@ class TermsandConditionsPage extends StatelessWidget {
             textStyle: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Constants.textColor,
+              color: Colors.white,
             ),
           ),
         ),
         titleSpacing: 0,
-        backgroundColor: Constants.buttonColor,
+        backgroundColor: Constants.deepNavy,
+        foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back_ios,color: Colors.white,),
           color: Constants.textColor,
         ),
       ),
@@ -78,10 +82,10 @@ class TermsandConditionsPage extends StatelessWidget {
                 'As long as the website and the information and services on the website are provided free of charge, we will not be liable for any loss or damage of any nature.',
                 textAlign: TextAlign.justify,
                 style: GoogleFonts.lato(
-                  textStyle: const TextStyle(
+                  textStyle:  TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
-                    color: Constants.textColor,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),

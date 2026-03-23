@@ -33,19 +33,28 @@ class ButtonWidget extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          minimumSize: Size.fromHeight(40),
-          backgroundColor: Colors.white,
-        ),
-        child: FittedBox(
-          child: Text(
-            text,
-            style: TextStyle(fontSize: 20, color: Colors.black),
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        elevation: 1,
+      ),
+      onPressed: onClicked,
+      child: FittedBox(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 20,
+            color: colorScheme.onSurface,
           ),
         ),
-        onPressed: onClicked,
-      );
+      ),
+    );
+  }
 }
 
 class HeaderWidget extends StatelessWidget {
@@ -59,19 +68,23 @@ class HeaderWidget extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: colorScheme.onSurface,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(height: 8),
-          child,
-        ],
-      );
+        ),
+        const SizedBox(height: 8),
+        child,
+      ],
+    );
+  }
 }

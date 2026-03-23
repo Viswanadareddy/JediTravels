@@ -3,8 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loginout/start.dart';
 import 'constants.dart';
-//import 'package:google_fonts/google_fonts.dart';
-//import 'package:loginout/constants.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -17,170 +15,264 @@ class _ProfileState extends State<Profile> {
   final _auth = FirebaseAuth.instance;
   User? user = FirebaseAuth.instance.currentUser;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   static Future<DocumentSnapshot> getUserData(String uid) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    var data = await _firestore.collection('users').doc(user!.uid).get();
+    var data = await _firestore.collection('users').doc(uid).get();
     return data;
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme= Theme.of(context).colorScheme;
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Profile Details',
-              style: TextStyle(fontSize: 22, color: Constants.textColor)),
-          backgroundColor: Constants.buttonColor,
-          foregroundColor: Colors.black,
-          automaticallyImplyLeading: false,
-        ),
-        body: FutureBuilder<DocumentSnapshot>(
-          future: getUserData(
-            user!.uid,
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: Constants.deepNavy,
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'My Profile',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
-          builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else {
-              return profileView(
-                  snapshot.data!['name'], snapshot.data!['email']);
-            }
-          },
-        ) // This trailing comma makes auto-formatting nicer for build methods.
-        );
+        ),
+      ),
+      body: FutureBuilder<DocumentSnapshot>(
+        future: getUserData(user!.uid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: Text('Could not load profile'));
+          }
+          return _buildProfile(
+            snapshot.data!['name'] ?? 'User',
+            snapshot.data!['email'] ?? '',
+          );
+        },
+      ),
+    );
   }
 
-  Widget profileView(String name, String email) {
-    return Column(
-      children: <Widget>[
-        SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 50),
-          child: Stack(
-            children: <Widget>[
-              ClipOval(
-                child: Image.asset(
-                  'assets/avatar.jpg',
-                  height: 150,
-                  width: 150,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Positioned(
-                  bottom: 1,
-                  right: 1,
-                  child: Container(
-                    height: 40,
-                    width: 40,
-                    child: Icon(
-                      Icons.add_a_photo,
-                      color: Colors.white,
-                    ),
-                    decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.all(Radius.circular(20))),
-                  ))
-            ],
-          ),
-        ),
-        Expanded(
-            child: Container(
-          decoration: BoxDecoration(
+  Widget _buildProfile(String name, String email) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Header section with avatar
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Constants.deepNavy,
               borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-              color: Constants.buttonColor),
-          child: Column(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 25, 20, 4),
-                child: Container(
-                  height: 60,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        name,
-                        style: TextStyle(color: Constants.textColor),
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                // Avatar
+                Stack(
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Constants.emerald,
+                          width: 3,
+                        ),
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/avatar.jpg',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                  decoration: BoxDecoration(
-                      color: Constants.background,
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      border:
-                          Border.all(width: 1.0, color: Constants.textColor)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 5, 20, 4),
-                child: Container(
-                  height: 60,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        email,
-                        style: TextStyle(color: Constants.textColor),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: const BoxDecoration(
+                          color: Constants.emerald,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 16,
+                        ),
                       ),
                     ),
-                  ),
-                  decoration: BoxDecoration(
-                      color: Constants.background,
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      border:
-                          Border.all(width: 1.0, color: Constants.textColor)),
+                  ],
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 4),
-                child: SizedBox(
+                const SizedBox(height: 12),
+                // Name
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Email
+                Text(
+                  email,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 28),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Info cards
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                // My Bookings button
+                
+                _menuItem(
+                  icon: Icons.history,
+                  label: 'My Bookings',
+                  onTap: () => Navigator.pushNamed(context, 'booking_history'),
+                ),
+                const SizedBox(height: 12),
+                _menuItem(
+                  icon: Icons.person_outline,
+                  label: 'Edit Profile',
+                  onTap: () {},
+                ),
+                const SizedBox(height: 12),
+                _menuItem(
+                  icon: Icons.notifications_outlined,
+                  label: 'Notifications',
+                  onTap: () {},
+                ),
+                const SizedBox(height: 12),
+                _menuItem(
+                  icon: Icons.help_outline,
+                  label: 'Help & Support',
+                  onTap: () {},
+                ),
+
+                const SizedBox(height: 32),
+
+                // Logout button
+                SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: (){
-                      Navigator.pushNamed(context, 'booking_history');
-                    },
-                    icon:  const Icon(Icons.history),
-                    label: const Text('My Bookings'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Constants.background,
-                      foregroundColor: Constants.textColor,
-                    ),
-                    ),
-                ),
-                ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Container(
-                    height: 50,
-                    width: 200,
-                    child: Align(
-                        child: TextButton(
-                      onPressed: () async {
-                        await _auth.signOut();
+                    onPressed: () async {
+                      await _auth.signOut();
+                      if (mounted) {
                         Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => StartPage()),
-                            (route) => false);
-                      },
-                      child: Text('Log Out',
-                          style: TextStyle(
-                              color: Constants.textColor, fontSize: 20)),
-                    )),
-                    decoration: BoxDecoration(
-                        color: Constants.extraColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                        )),
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StartPage(),
+                          ),
+                          (route) => false,
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                    label: const Text(
+                      'Log Out',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade400,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ),
-              )
-            ],
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
-        ))
-      ],
+        ],
+      ),
+    );
+  }
+
+  Widget _menuItem({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+final isDark = Theme.of(context).brightness == Brightness.dark;
+final cardColor = isDark ? const Color(0xFF1C2535) : Constants.cardWhite;
+final iconBg = isDark ? Colors.white12 : Constants.deepNavy.withOpacity(0.08);
+final iconColor = isDark ? Colors.white : Constants.deepNavy;
+final secondaryText = colorScheme.onSurface.withOpacity(0.7);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style:  TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const Spacer(),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: secondaryText,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -4,6 +4,14 @@ import 'package:intl/intl.dart';
 import 'button_widget.dart';
 
 class DatetimePickerWidget extends StatefulWidget {
+  final String title;
+  final ValueChanged<DateTime?>? onChanged;
+
+  const DatetimePickerWidget({
+    Key? key,
+    this.title = 'DateTime',
+    this.onChanged,
+  }) : super(key: key);
   @override
   _DatetimePickerWidgetState createState() => _DatetimePickerWidgetState();
 }
@@ -21,7 +29,7 @@ class _DatetimePickerWidgetState extends State<DatetimePickerWidget> {
 
   @override
   Widget build(BuildContext context) => ButtonHeaderWidget(
-        title: 'DateTime',
+        title: widget.title,
         text: getText(),
         onClicked: () => pickDateTime(context),
       );
@@ -42,6 +50,8 @@ class _DatetimePickerWidgetState extends State<DatetimePickerWidget> {
         time.minute,
       );
     });
+
+    widget.onChanged?.call(dateTime);
   }
 
   Future<DateTime?> pickDate(BuildContext context) async {

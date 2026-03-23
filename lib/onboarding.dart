@@ -26,76 +26,139 @@ class _OnbordingState extends State<Onbording> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 40,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0F2044),
+                  Color(0XFF1A5266),
+                ],
+                ),
             ),
-            Expanded(
-              child: PageView.builder(
-                itemCount: splashData.length,
-                itemBuilder: (context, index) {
-                  return _onboardimage(context, splashData[index]['image']!,
-                      splashData[index]['text']!);
-                },
-                controller: _controller,
-                onPageChanged: (int newindex) {
-                  setState(() {
-                    currentIndex = newindex;
-                  });
-                },
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ),
+
+          //Content
+          SafeArea(
+            child: Column(
               children: [
-                Row(
-                  children: List.generate(
-                    splashData.length,
-                    (index) => _pageindicators(
-                      context,
-                      index == currentIndex ? 100 : 40,
-                      index == currentIndex
-                          ? Constants.textColor
-                          : Constants.buttonColor.withOpacity(0.6),
+                //Skip button top right
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: currentIndex != splashData.length -1
+                    ? TextButton(
+                      onPressed: () =>
+                      Navigator.pushNamed(context, 'start'),
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                      )
+                      : const SizedBox(height: 44),
                     ),
-                  ),
-                ),
-                TextButton(
-                  child: Text(
-                    currentIndex != splashData.length - 1 ? 'NEXT' : "DONE",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Constants.textColor,
                     ),
-                  ),
-                  onPressed: () {
-                    currentIndex != splashData.length - 1
-                        ? _controller.nextPage(
-                            duration: Duration(microseconds: 250),
-                            curve: Curves.easeInOutBack,
-                          )
-                        : Navigator.pushNamed(context, 'start');
-                  },
-                ),
+
+                    // Page view
+                    Expanded(
+                      child: PageView.builder(
+                        controller: _controller,
+                        itemCount: splashData.length,
+                        onPageChanged: (index){
+                          setState(() => currentIndex =index);
+                        },
+                        itemBuilder: (context, index){
+                          return _buildPage(splashData[index]);
+                        },
+                        ),
+                        ),
+
+                        //Bottom section - dots and button
+                        Padding(
+                          padding: const EdgeInsetsGeometry.fromLTRB(24,0, 24, 40),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Dot indiactors
+                              Row(
+                                children: List.generate(
+                                  splashData.length, 
+                                  (index) => AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    margin: const EdgeInsets.only(right: 6),
+                                    width: index == currentIndex ? 24 : 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: index == currentIndex
+                                      ? Constants.emerald
+                                      : Colors.white30,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    ),
+                                  ),
+                              ),
+
+                              // Next / Get Started button
+                              GestureDetector(
+                                onTap: (){
+                                  if(currentIndex != splashData.length -1){
+                                    _controller.nextPage(
+                                      duration: const Duration(milliseconds: 400), 
+                                      curve: Curves.easeInOut
+                                      );
+                                  } else{
+                                    Navigator.pushNamed(context, 'start');
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 28,
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Constants.emerald,
+                                    borderRadius: BorderRadius.circular(30),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Constants.emerald.withOpacity(0.4),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    currentIndex != splashData.length -1
+                                    ? 'Next →'
+                                    : 'Get Started',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          ),
               ],
             ),
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
-      backgroundColor: Colors.white,
+            ),
+        ],
+      )
     );
   }
 }
 
-Widget _onboardimage(BuildContext context, String image, String text) {
+// Previous Version
+/*Widget _onboardimage(BuildContext context, String image, String text) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -138,16 +201,82 @@ Widget _pageindicators(BuildContext context, double width, Color color) {
       color: color,
     ),
   );
+}*/
+
+Widget _buildPage(Map<String, String> data){
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 32),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Image in a frosted card
+        Container(
+          width: double.infinity,
+          height: 260,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Image.asset(
+              data['image']!,
+              fit: BoxFit.cover
+              ),
+          ),
+        ),
+
+        const SizedBox(height: 40),
+
+        // Title
+        Text(
+          data['title']!,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            height: 1.3,
+          ),
+          ),
+
+          const SizedBox(height: 16),
+
+          //Subtitle
+          Text(data['text']!,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 15,
+            height: 1.6,
+          ),
+          )
+      ],
+    ),
+    );
 }
+
 
 List<Map<String, String>> splashData = [
   {
-    "text": "We are here to serve any time",
-    "image": "assets/anytime.jpeg",
+    'title': 'Discover Your\nPerfect Stay',
+    'text':
+        'Browse thousands of hotels worldwide with guaranteed best prices',
+    'image': 'assets/anytime.jpeg',
   },
   {
-    "text": "We take atmost care of our guests at stay",
-    "image": "assets/care.jpeg"
+    'title': 'We Care About\nYour Comfort',
+    'text':
+        'Every hotel is verified. Every room is clean, safe and ready for you',
+    'image': 'assets/care.jpeg',
   },
-  {"text": "Enjoy your stay with us", "image": "assets/enjoy_your_stay.jpeg"},
+  {
+    'title': 'Book in Seconds,\nEnjoy Forever',
+    'text':
+        'Instant confirmation. No hidden fees. Cancel anytime with one tap',
+    'image': 'assets/enjoy_your_stay.jpeg',
+  },
 ];

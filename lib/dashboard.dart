@@ -10,14 +10,18 @@ class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // It will provie us total height  and width of our screen
-    Size size = MediaQuery.of(context).size;
+    
+    final colorScheme = Theme.of(context).colorScheme;
+  final size = MediaQuery.of(context).size;
     // it enable scrolling on small device
-    return SingleChildScrollView(
+    return Container(
+      color: colorScheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           HeaderWithSearchBox(size: size),
-          Showall(title: "Recomended"),
+          const SizedBox(height: 8),
+          Showall(title: "Recommended"),
           const SizedBox(height: 10),
           RecommendedHotels(),
           Showall(title: "Popular"),

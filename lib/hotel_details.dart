@@ -20,7 +20,13 @@ class HotelDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+final isDark = Theme.of(context).brightness == Brightness.dark;
+final secondaryText = colorScheme.onSurface.withOpacity(0.78);
+final detailsCardColor = isDark ? const Color(0xFF1E2A3D) : Colors.white;
+final tagColor = isDark ? Colors.white12 : Colors.grey.shade300;
     return Scaffold(
+      backgroundColor :isDark ? const Color(0xFF0B1220) :colorScheme.surface,
       body: Stack(
         children: <Widget>[
           SingleChildScrollView(
@@ -30,7 +36,10 @@ class HotelDetailsPage extends StatelessWidget {
               children: <Widget>[
                 SizedBox(
                   height: 400,
-                  child: Image.asset('$image', fit: BoxFit.cover),
+                  child: Hero(
+                    tag: hotelname,
+                    child: Image.asset('$image', fit: BoxFit.cover),
+                ),
                 ),
                 const SizedBox(height: 20),
                 Padding(
@@ -38,7 +47,7 @@ class HotelDetailsPage extends StatelessWidget {
                   child: Text(
                     "$hotelname",
                     style: TextStyle(
-                        color: Constants.extraColor,
+                        color: colorScheme.onSurface,
                         fontSize: 28.0,
                         fontWeight: FontWeight.bold),
                   ),
@@ -52,16 +61,16 @@ class HotelDetailsPage extends StatelessWidget {
                         horizontal: 16.0,
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.grey,
+                          color: tagColor,
                           borderRadius: BorderRadius.circular(20.0)),
                       child: Text(
                         "Top Rated",
-                        style: TextStyle(color: Colors.white, fontSize: 13.0),
+                        style: TextStyle(color: colorScheme.onSurface, fontSize: 13.0),
                       ),
                     ),
                     Spacer(),
                     IconButton(
-                      color: Constants.buttonColor,
+                      color: Constants.emerald,
                       icon: Icon(Icons.favorite_border),
                       onPressed: () {},
                     )
@@ -69,7 +78,7 @@ class HotelDetailsPage extends StatelessWidget {
                 ),
                 Container(
                   padding: const EdgeInsets.all(32.0),
-                  color: Colors.white,
+                  color: detailsCardColor,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -82,26 +91,32 @@ class HotelDetailsPage extends StatelessWidget {
                               children: <Widget>[
                                 Row(
                                   children: <Widget>[
-                                    Text("$rating"),
+                                    Text(
+                                      "$rating",
+                                      style: TextStyle(
+                                        color: colorScheme.onSurface,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      ),
                                     Icon(
                                       Icons.star,
-                                      color: Colors.purple,
+                                      color: const Color(0xFFFFC107),
                                     ),
                                     Icon(
                                       Icons.star,
-                                      color: Colors.purple,
+                                      color: const Color(0xFFFFC107),
                                     ),
                                     Icon(
                                       Icons.star,
-                                      color: Colors.purple,
+                                      color: const Color(0xFFFFC107),
                                     ),
                                     Icon(
                                       Icons.star,
-                                      color: Colors.purple,
+                                      color: const Color(0xFFFFC107),
                                     ),
                                     Icon(
                                       Icons.star_border,
-                                      color: Colors.purple,
+                                      color: const Color(0xFFFFC107),
                                     ),
                                   ],
                                 ),
@@ -111,12 +126,12 @@ class HotelDetailsPage extends StatelessWidget {
                                         child: Icon(
                                       Icons.location_on,
                                       size: 16.0,
-                                      color: Colors.grey,
+                                      color: secondaryText,
                                     )),
                                     TextSpan(text: "$location")
                                   ]),
                                   style: TextStyle(
-                                      color: Colors.grey, fontSize: 12.0),
+                                      color: secondaryText, fontSize: 12.0),
                                 )
                               ],
                             ),
@@ -126,7 +141,7 @@ class HotelDetailsPage extends StatelessWidget {
                               Text(
                                 "\$ $price",
                                 style: TextStyle(
-                                    color: Constants.textColor,
+                                    color: colorScheme.onSurface,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20.0),
                               ),
@@ -134,7 +149,7 @@ class HotelDetailsPage extends StatelessWidget {
                                 "/per night",
                                 style: TextStyle(
                                     fontSize: 12.0,
-                                    color: Constants.kPrimaryColor),
+                                    color: Constants.emerald),
                               )
                             ],
                           )
@@ -147,6 +162,8 @@ class HotelDetailsPage extends StatelessWidget {
                           "Amenities",
                           style: TextStyle(
                             fontSize: 18,
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -157,29 +174,40 @@ class HotelDetailsPage extends StatelessWidget {
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              Icon(Icons.sports_esports),
-                              Text("Sports"),
+                              Icon(Icons.sports_esports,
+                              color: colorScheme.onSurface),
+                              Text("Sports",
+                              style: TextStyle(color: colorScheme.onSurface),),
                             ],
                           ),
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              Icon(Icons.local_parking),
-                              Text("Parking"),
+                              Icon(Icons.local_parking,
+                              color: colorScheme.onSurface,
+                              ),
+                              Text("Parking",
+                              style: TextStyle(color: colorScheme.onSurface),
+                              ),
                             ],
                           ),
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              Icon(Icons.local_bar),
-                              Text("Bar"),
+                              Icon(Icons.local_bar,
+                              color: colorScheme.onSurface),
+                              Text("Bar",
+                              style: TextStyle(color: colorScheme.onSurface),),
                             ],
                           ),
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              Icon(Icons.wifi),
-                              Text("Wifi"),
+                              Icon(Icons.wifi, 
+                              color: colorScheme.onSurface,),
+                              Text("Wifi",
+                              style: TextStyle(color: colorScheme.onSurface),
+                              ),
                             ],
                           )
                         ],
@@ -190,8 +218,8 @@ class HotelDetailsPage extends StatelessWidget {
                         child: MaterialButton(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30.0)),
-                          color: Constants.buttonColor,
-                          textColor: Constants.textColor,
+                          color: Constants.deepNavy,
+                          textColor: Colors.white,
                           child: Text(
                             "Book Now",
                             style: TextStyle(fontWeight: FontWeight.normal),
@@ -215,14 +243,16 @@ class HotelDetailsPage extends StatelessWidget {
                       Text(
                         "Description".toUpperCase(),
                         style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 14.0),
+                            fontWeight: FontWeight.w600, 
+                            fontSize: 14.0,
+                            color: colorScheme.onSurface),
                       ),
                       const SizedBox(height: 10.0),
                       Text(
                         "$hotelname is a mixture of sophisticated and relaxed ambience offering a big range of quality services and a modern design & decoration. .The contemporary design of the 167 Deluxe Rooms and 4 Suites combines elegance and sobriety. All rooms are complemented with luxury linens and bathrobe and come equipped with hairdryer, telephone with 2 lines, air conditioning, satellite TV, Pay TV, WiFi Internet access, minibar and safe-deposit box. Our Ad Lib Restaurant, 24 hour Room Service, Business Centre and Fitness Centre, Intra-Muros Bar, Cigar Lounge and Lobby Library are waiting for you.",
                         textAlign: TextAlign.justify,
                         style: TextStyle(
-                            fontWeight: FontWeight.w300, fontSize: 14.0),
+                            fontWeight: FontWeight.w300, fontSize: 14.0, color: secondaryText),
                       ),
                     ],
                   ),
@@ -236,9 +266,9 @@ class HotelDetailsPage extends StatelessWidget {
             right: 0,
             child: AppBar(
               backgroundColor: Colors.transparent,
-              automaticallyImplyLeading: false,
+              automaticallyImplyLeading: true,
               elevation: 0,
-              centerTitle: true,
+               iconTheme: const IconThemeData(color: Colors.white),
             ),
           ),
           /*Align(

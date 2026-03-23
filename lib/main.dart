@@ -13,6 +13,7 @@ import 'registration.dart';
 import 'onboarding.dart';
 import 'settings.dart';
 import 'profile.dart';
+import 'ResetPassword.dart';
 import 'terms_conditions.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -33,13 +34,13 @@ class MyApp extends StatelessWidget {
       scrollBehavior: MyScrollBehaviour(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF77D970),
+          seedColor: const Color(0xFF1A5276),
           brightness: Brightness.light,),
           useMaterial3: true,
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF77D970),
+          seedColor: const Color(0xFF1A5276),
           brightness: Brightness.dark,
           ),
           useMaterial3: true,
@@ -57,6 +58,8 @@ class MyApp extends StatelessWidget {
         'home': (context) => HomeScreen(),
         'terms_and_conditions': (context) => TermsandConditionsPage(),
         'booking_history':(context) => BookingHistoryScreen(),
+        'reset_password': (context) => ResetScreen(),
+        
       },
       home: Onbording(),
     );

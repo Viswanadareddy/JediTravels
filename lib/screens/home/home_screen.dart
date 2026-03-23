@@ -28,46 +28,37 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: SizedBox(
-          height: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(
-              4,
-              (index) => IconButton(
-                icon: Opacity(
-                  opacity: 1.0,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(_bottomappbaritems[index],
-                          color: index == _currentIndex
-                              ? Constants.buttonColor
-                              : Constants.textColor),
-                      index == _currentIndex ? Spacer() : SizedBox(),
-                    ],
-                  ),
-                ),
-                onPressed: () {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-              ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      resizeToAvoidBottomInset: false,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index){
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        destinations: const[
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home), 
+            label: 'Home',
             ),
-          ),
+            NavigationDestination(
+              icon: Icon(Icons.local_offer_outlined),
+              selectedIcon: Icon(Icons.local_offer),
+               label: 'Offers'),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline),
+              selectedIcon: Icon(Icons.person), 
+              label: 'Profile'),
+            NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(Icons.settings), 
+              label: 'Settings'),
+        ],
         ),
-      ),
       body: _children[_currentIndex],
     );
   }
 }
 
-final List<IconData> _bottomappbaritems = const <IconData>[
-  Icons.home,
-  Icons.local_offer,
-  Icons.person,
-  Icons.settings,
-];

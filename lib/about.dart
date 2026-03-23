@@ -3,7 +3,7 @@ import 'constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class About extends StatefulWidget {
-  const About({Key? key}) : super(key: key);
+  const About({super.key});
 
   @override
   _AboutState createState() => _AboutState();
@@ -12,7 +12,9 @@ class About extends StatefulWidget {
 class _AboutState extends State<About> {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text(
           'About',
@@ -20,18 +22,20 @@ class _AboutState extends State<About> {
             textStyle: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Constants.textColor,
+              color: Colors.white,
             ),
           ),
         ),
         titleSpacing: 0,
-        backgroundColor: Constants.buttonColor,
+        backgroundColor: Constants.deepNavy,
+        foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back_ios),
-          color: Constants.textColor,
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
       body: SingleChildScrollView(
@@ -47,10 +51,10 @@ class _AboutState extends State<About> {
                 '\n\n24/7 support Whether you’ve just booked or are already enjoying your trip, our customer experience team are on hand around the clock to answer your questions and advocate on your behalf in more than 40 languages. Make sure to check out our FAQ for travellers.',
                 textAlign: TextAlign.justify,
                 style: GoogleFonts.lato(
-                  textStyle: const TextStyle(
+                  textStyle:  TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
-                    color: Constants.textColor,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),

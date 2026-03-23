@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,6 +23,12 @@ class _PaymentsPageState extends State<PaymentsPage> {
   TextEditingController textEditingController = new TextEditingController();
   DateTime? checkInDateTime;
   DateTime? checkOutDateTime;
+  void showMessage(String message){
+    if (!mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message)),
+  );
+  }
 
   @override
   void initState() {
@@ -41,20 +46,38 @@ class _PaymentsPageState extends State<PaymentsPage> {
   }
 
   void openCheckout() {
-    var options = {
+    final parsedPrice = double.tryParse(widget.price.trim());
+
+if (parsedPrice == null) {
+  debugPrint('Invalid price string: ${widget.price}');
+  ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Invalid price: ${widget.price}')),
+  );
+  return;
+}
+
+    final options = {
       "key": "rzp_test_STzl7u7j2D40D2",
-      "amount": num.parse(widget.price) * 100,
+      "amount": (parsedPrice * 100).toInt(),
       "name": 'Booking the hotel',
       'description': 'Pay the money',
-      'prefill': {'email': 'Nikhil', 'contact': '123456789'},
+      'prefill': {'email': 'test@example.com', 'contact': '9999999999'},
       'external': {
         'wallets': ['paytm']
       }
     };
+
+    debugPrint('Opening Razorpay with options: $options');
     try {
+      
       razerPay.open(options);
-    } catch (e) {
-      print(e);
+      debugPrint('Returned from Razorpay.open call');
+    } catch (e, st) {
+      debugPrint('Razorpay open error: $e');
+      debugPrint('$st');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Razorpay failed to open')),
+    );
     }
   }
 
@@ -85,13 +108,19 @@ class _PaymentsPageState extends State<PaymentsPage> {
     if (mounted){
       Navigator.pop(context);
       Navigator.pop(context);
-      Fluttertoast.showToast(msg: 'Hotel Booked Successfully!');
+      showMessage('Hotel Booked Successfully!');
     }
   }
 
   void handlerPaymentError(PaymentFailureResponse response) {
-    Navigator.pop(context);
-    Fluttertoast.showToast(msg: 'Error');
+    //Navigator.pop(context);
+    debugPrint('Razorpay payment error code: ${response.code}');
+  debugPrint('Razorpay payment error message: ${response.message}');
+    ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Payment failed: ${response.code} - ${response.message}'),
+    ),
+  );
   }
 
   void handlerExternalWallet(ExternalWalletResponse response) {
@@ -101,16 +130,17 @@ class _PaymentsPageState extends State<PaymentsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Constants.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: Text(
+        backgroundColor: Constants.deepNavy,
+        foregroundColor: Colors.white,
+        title: const Text(
           'Payment Gateway',
           style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Constants.textColor),
+              color: Colors.white),
         ),
-        backgroundColor: Constants.buttonColor,
       ),
       body: Container(
         child: Column(
@@ -128,7 +158,14 @@ class _PaymentsPageState extends State<PaymentsPage> {
                 )),
             Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: DatetimePickerWidget(),
+              child: DatetimePickerWidget(
+                title: 'DateTime',
+                onChanged: (value){
+                  setState(() {
+                    checkInDateTime= value;
+                  });
+                },
+              ),
             ),
             Padding(
                 padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -141,11 +178,31 @@ class _PaymentsPageState extends State<PaymentsPage> {
                 )),
             Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: DatetimePickerWidget(),
+              child: DatetimePickerWidget(
+                title: 'DateTime',
+                onChanged: (value){
+                  setState(() {
+                    checkOutDateTime = value;
+                  });
+                },
+              ),
             ),
             Center(
               child: ElevatedButton(
                 onPressed: () {
+                  debugPrint('Pay tapped');
+  debugPrint('hotel: ${widget.hotelname}');
+  debugPrint('price raw: ${widget.price}');
+  debugPrint('checkInDateTime: $checkInDateTime');
+  debugPrint('checkOutDateTime: $checkOutDateTime');
+                    if(checkInDateTime==null|| checkOutDateTime ==null){
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please select both check-in and check-out time'),
+                      ),
+                      );
+                      return;
+                    }
                   openCheckout();
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: Constants.buttonColor),

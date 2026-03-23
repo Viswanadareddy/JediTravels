@@ -9,12 +9,14 @@ class BookingHistoryScreen extends StatelessWidget{
   @override
   Widget build(BuildContext context){
     final user = FirebaseAuth.instance.currentUser;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text('My Bookings'),
-        backgroundColor: Constants.buttonColor,
-        foregroundColor: Constants.textColor,
+        backgroundColor:  Constants.deepNavy,
+        foregroundColor: Colors.white,
         automaticallyImplyLeading: true,
       ),
       body: user == null
@@ -37,23 +39,26 @@ class BookingHistoryScreen extends StatelessWidget{
           }
 
           if(!snapshot.hasData || snapshot.data!.docs.isEmpty){
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.hotel, size:64, color: Colors.grey),
+                  Icon(Icons.hotel, 
+                  size:64, 
+                  color: colorScheme.onSurfaceVariant
+                  ),
                   SizedBox(height: 16),
                   Text(
                     'No bookings yet',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.grey,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                     ),
                     SizedBox(height: 8),
                     Text(
                       'Book a hotel to see it here',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
                       ),
                 ],
               ),
@@ -84,7 +89,9 @@ class BookingCard extends StatelessWidget{
 
   @override
   Widget build(BuildContext context){
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
+      color: colorScheme.surfaceContainerHighest,
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -100,10 +107,10 @@ class BookingCard extends StatelessWidget{
               children: [
             Text(
               booking['hotelName'] ?? 'Unknown Hotel',
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Constants.textColor,
+                color: colorScheme.onSurface,
               ),
               ),
               Container(
@@ -117,9 +124,9 @@ class BookingCard extends StatelessWidget{
                 ),
                 child: Text(
                   '\$${booking['price']}',
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Constants.textColor,
+                    color: Colors.white,
                   ),
                   ),
               ),
@@ -128,24 +135,24 @@ class BookingCard extends StatelessWidget{
         const SizedBox(height: 12),
         const Divider(),
         const SizedBox(height: 8),
-        _infoRow(Icons.confirmation_number,
+        _infoRow( context,Icons.confirmation_number,
         'Payment ID',
         booking['paymentId']?? 'N/A',
         ),
         const SizedBox(height: 8),
-        _infoRow(
+        _infoRow( context,
           Icons.login,
           'Check In',
           _formatDate(booking['checkIn']),
         ),
         const SizedBox(height: 8),
-        _infoRow(
+        _infoRow( context,
           Icons.logout,
           'Check Out',
           _formatDate(booking['checkOut']),
         ),
         const SizedBox(height: 8),
-        _infoRow(
+        _infoRow( context,
           Icons.access_time,
           'Booked On',
           _formatDate(booking['bookedAt']),
@@ -156,23 +163,27 @@ class BookingCard extends StatelessWidget{
     );
   }
 
-  Widget _infoRow(IconData icon, String label, String value) {
+  Widget _infoRow(BuildContext context, IconData icon, String label, String value) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 16 ,color: Constants.kPrimaryColor),
+        Icon(icon, size: 16 ,color: colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           '$label: ',
-         style: const TextStyle(
+         style:  TextStyle(
           fontWeight: FontWeight.w500,
-          color: Colors.grey,
+          color: colorScheme.onSurfaceVariant,
           fontSize: 13,
          ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 13),
+              style:  TextStyle(
+                fontSize: 13,
+                color: colorScheme.onSurface
+                ),
               overflow: TextOverflow.ellipsis,
               ),
               ),
