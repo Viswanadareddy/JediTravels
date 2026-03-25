@@ -1,81 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:loginout/hotel_details.dart';
-import 'package:loginout/widgets/hotel_card.dart';
-import 'package:loginout/widgets/hotel_card_shimmer.dart';
+import 'package:loginout/config/app_config.dart';
+import 'package:loginout/screens/home/components/popular_backend.dart';
+import 'package:loginout/screens/home/components/popular_firestore.dart';
 
 class Popular extends StatelessWidget {
   const Popular({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('hotels')
-          .where('category', isEqualTo: 'popular')
-          .snapshots(),
-      builder: (context, snapshot) {
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: List.generate(
-                3,
-                (_) => const HotelCardShimmer(),
-              ),
-            ),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return const SizedBox(
-            height: 200,
-            child: Center(child: Text('Could not load hotels')),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const SizedBox(
-            height: 200,
-            child: Center(child: Text('No hotels found')),
-          );
-        }
-
-        final hotels = snapshot.data!.docs;
-
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: hotels.map((doc) {
-              final hotel = doc.data() as Map<String, dynamic>;
-              return HotelCard(
-                image: hotel['image'] ?? '',
-                hotelname: hotel['name'] ?? '',
-                location: hotel['location'] ?? '',
-                price: hotel['price'] ?? 0,
-                rating: hotel['rating'] ?? '0',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HotelDetailsPage(
-                        image: hotel['image'] ?? '',
-                        hotelname: hotel['name'] ?? '',
-                        location: hotel['location'] ?? '',
-                        price: hotel['price'].toString(),
-                        rating: hotel['rating'] ?? '0',
-                      ),
-                    ),
-                  );
-                },
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
+    if (AppConfig.useBackendHotels) {
+      return PopularBackend();
+    } else {
+      return const PopularFirestore();
+    }
   }
 }

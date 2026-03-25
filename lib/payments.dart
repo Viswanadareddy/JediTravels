@@ -2,27 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import 'constants.dart';
 import 'datetime_picker_widget.dart';
+import 'services/api_service.dart';
 
 class PaymentsPage extends StatefulWidget {
   const PaymentsPage({
-    Key? key, 
+    Key? key,
+     this.hotelId, 
     required this.price,
     required this.hotelname,
     }) : super(key: key);
+    final int? hotelId;
   final String price;
   final String hotelname;
 
   @override
-  _PaymentsPageState createState() => _PaymentsPageState();
+  State<PaymentsPage> createState() => _PaymentsPageState();
 }
 
 class _PaymentsPageState extends State<PaymentsPage> {
   late Razorpay razerPay;
-  TextEditingController textEditingController = new TextEditingController();
+  final ApiService _apiService = ApiService();
+
+   final TextEditingController _guestsController =
+      TextEditingController(text: '1');
+
+  final TextEditingController _offerPercentController =
+      TextEditingController(text: '0');
+
   DateTime? checkInDateTime;
   DateTime? checkOutDateTime;
+
+  bool _isLoadingQuote = false;
+  Map<String, dynamic>? _quote;
   void showMessage(String message){
     if (!mounted) return;
   ScaffoldMessenger.of(context).showSnackBar(
@@ -41,45 +55,91 @@ class _PaymentsPageState extends State<PaymentsPage> {
 
   @override
   void dispose() {
+    _guestsController.dispose();
+  _offerPercentController.dispose();
     razerPay.clear();
     super.dispose();
   }
 
-  void openCheckout() {
-    final parsedPrice = double.tryParse(widget.price.trim());
+  Future<void> _getQuote() async {
+  if (widget.hotelId == null || widget.hotelId == 0) {
+    showMessage('Pricing quote is available in backend hotel mode');
+    return;
+  }
 
-if (parsedPrice == null) {
-  debugPrint('Invalid price string: ${widget.price}');
-  ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Invalid price: ${widget.price}')),
-  );
-  return;
+  if (checkInDateTime == null || checkOutDateTime == null) {
+    showMessage('Please select both check-in and check-out time');
+    return;
+  }
+
+  final int guests = int.tryParse(_guestsController.text.trim()) ?? 1;
+  final int offerPercent =
+      int.tryParse(_offerPercentController.text.trim()) ?? 0;
+
+  setState(() {
+    _isLoadingQuote = true;
+  });
+
+  try {
+    final result = await _apiService.getPricingQuote(
+      hotelId: widget.hotelId!,
+      checkIn: DateFormat('yyyy-MM-dd').format(checkInDateTime!),
+      checkOut: DateFormat('yyyy-MM-dd').format(checkOutDateTime!),
+      guests: guests,
+      offerPercent: offerPercent,
+    );
+
+    setState(() {
+      _quote = result;
+    });
+
+    showMessage('Pricing quote loaded');
+  } catch (e) {
+    showMessage('Failed to get pricing quote');
+  } finally {
+    setState(() {
+      _isLoadingQuote = false;
+    });
+  }
 }
 
-    final options = {
-      "key": "rzp_test_STzl7u7j2D40D2",
-      "amount": (parsedPrice * 100).toInt(),
-      "name": 'Booking the hotel',
-      'description': 'Pay the money',
-      'prefill': {'email': 'test@example.com', 'contact': '9999999999'},
-      'external': {
-        'wallets': ['paytm']
-      }
-    };
-
-    debugPrint('Opening Razorpay with options: $options');
-    try {
-      
-      razerPay.open(options);
-      debugPrint('Returned from Razorpay.open call');
-    } catch (e, st) {
-      debugPrint('Razorpay open error: $e');
-      debugPrint('$st');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Razorpay failed to open')),
-    );
-    }
+double _amountToPay() {
+  if (_quote != null && _quote!['final_total'] != null) {
+    return (_quote!['final_total'] as num).toDouble();
   }
+
+  return double.tryParse(widget.price.trim()) ?? 0;
+}
+void openCheckout() {
+  final parsedPrice = _amountToPay();
+
+  if (parsedPrice <= 0) {
+    debugPrint('Invalid payable amount: $parsedPrice');
+    showMessage('Invalid payable amount');
+    return;
+  }
+
+  final options = {
+    "key": "rzp_test_STzl7u7j2D40D2",
+    "amount": (parsedPrice * 100).toInt(),
+    "name": 'Booking the hotel',
+    'description': 'Pay for ${widget.hotelname}',
+    'prefill': {'email': 'test@example.com', 'contact': '9999999999'},
+    'external': {
+      'wallets': ['paytm']
+    }
+  };
+
+  debugPrint('Opening Razorpay with options: $options');
+  try {
+    razerPay.open(options);
+    debugPrint('Returned from Razorpay.open call');
+  } catch (e, st) {
+    debugPrint('Razorpay open error: $e');
+    debugPrint('$st');
+    showMessage('Razorpay failed to open');
+  }
+}
 
   void handlerPaymentSuccess(PaymentSuccessResponse response) async{
     //Previous version
@@ -95,7 +155,8 @@ if (parsedPrice == null) {
         .add({
           'userId': user.uid,
           'hotelName': widget.hotelname,
-          'price' : widget.price,
+          'price' : _amountToPay().toStringAsFixed(2),
+          'quote' : _quote,
           'paymentId':response.paymentId,
           'bookedAt':DateTime.now().toIso8601String(),
           'checkIn':checkInDateTime?.toIso8601String(),
@@ -116,17 +177,66 @@ if (parsedPrice == null) {
     //Navigator.pop(context);
     debugPrint('Razorpay payment error code: ${response.code}');
   debugPrint('Razorpay payment error message: ${response.message}');
-    ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('Payment failed: ${response.code} - ${response.message}'),
-    ),
-  );
+    showMessage(
+      'Payment failed: ${response.code} - ${response.message}');
   }
 
   void handlerExternalWallet(ExternalWalletResponse response) {
     print('Wallet gateway successful');
   }
 
+Widget _quoteSection() {
+  if (_isLoadingQuote) {
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  if (_quote == null) {
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Text('Get a quote to see total amount'),
+    );
+  }
+
+  return Card(
+    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _quoteRow('Hotel', _quote!['hotel_name'].toString()),
+          _quoteRow('Nights', _quote!['nights'].toString()),
+          _quoteRow('Guests', _quote!['guests'].toString()),
+          _quoteRow('Base/night', '\$${_quote!['base_price_per_night']}'),
+          _quoteRow('Subtotal', '\$${_quote!['subtotal']}'),
+          _quoteRow('Extra guest charge', '\$${_quote!['extra_guest_charge']}'),
+          _quoteRow('Discount', '- \$${_quote!['discount_amount']}'),
+          const Divider(),
+          _quoteRow('Final total', '\$${_quote!['final_total']}', isBold: true),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _quoteRow(String label, String value, {bool isBold = false}) {
+  final style = TextStyle(
+    fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+    fontSize: isBold ? 16 : 14,
+  );
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      children: [
+        Expanded(child: Text(label, style: style)),
+        Text(value, style: style),
+      ],
+    ),
+  );
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,7 +252,7 @@ if (parsedPrice == null) {
               color: Colors.white),
         ),
       ),
-      body: Container(
+      body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,6 +297,55 @@ if (parsedPrice == null) {
                 },
               ),
             ),
+            Padding(
+  padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+  child: TextField(
+    controller: _guestsController,
+    keyboardType: TextInputType.number,
+    decoration: const InputDecoration(
+      labelText: 'Number of Guests',
+      border: OutlineInputBorder(),
+    ),
+  ),
+),
+Padding(
+  padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+  child: TextField(
+    controller: _offerPercentController,
+    keyboardType: TextInputType.number,
+    decoration: const InputDecoration(
+      labelText: 'Offer Percent (temporary)',
+      border: OutlineInputBorder(),
+    ),
+  ),
+),
+Center(
+  child: ElevatedButton(
+    onPressed: _getQuote,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Constants.buttonColor,
+    ),
+    child: const Text(
+      'Get Pricing Quote',
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+),
+_quoteSection(),
+Padding(
+  padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+  child: Text(
+    'Amount to pay now: \$${_amountToPay().toStringAsFixed(2)}',
+    style: TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: Constants.textColor,
+    ),
+  ),
+),
             Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -196,10 +355,8 @@ if (parsedPrice == null) {
   debugPrint('checkInDateTime: $checkInDateTime');
   debugPrint('checkOutDateTime: $checkOutDateTime');
                     if(checkInDateTime==null|| checkOutDateTime ==null){
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please select both check-in and check-out time'),
-                      ),
+                      showMessage(
+                          'Please select both check-in and check-out time'
                       );
                       return;
                     }

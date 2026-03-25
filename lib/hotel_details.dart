@@ -4,14 +4,16 @@ import 'package:loginout/constants.dart';
 import 'package:loginout/payments.dart';
 
 class HotelDetailsPage extends StatelessWidget {
-  const HotelDetailsPage({
+   HotelDetailsPage({
     Key? key,
+    this.hotelId,
     required this.image,
     required this.hotelname,
     required this.location,
     required this.price,
     required this.rating,
   }) : super(key: key);
+  final int? hotelId;
   final String image;
   final String hotelname;
   final String location;
@@ -233,6 +235,7 @@ final tagColor = isDark ? Colors.white12 : Colors.grey.shade300;
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => PaymentsPage(
+                                        hotelId: hotelId,
                                           price: price,
                                           hotelname: hotelname,
                                         )));
