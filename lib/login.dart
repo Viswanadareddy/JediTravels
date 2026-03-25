@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loginout/constants.dart';
 import 'package:loginout/screens/home/home_screen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -12,17 +14,33 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+bool _googleInitialized = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _passwordVisible = false;
 
+  Future<void> _initGoogleSignIn() async {
+  if (_googleInitialized) return;
+
+  await _googleSignIn.initialize();
+  _googleInitialized = true;
+}
+  
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
+
+  /*Future<void> _initGoogleSignIn() async {
+  if (_googleInitialized) return;
+
+  await _googleSignIn.initialize();
+  _googleInitialized = true;
+}*/
 
   Future<void> _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -64,13 +82,81 @@ class _LoginState extends State<Login> {
     }
   }
 
+Future<void> _signInWithGoogle() async {
+  setState(() => _isLoading = true);
+
+  try {
+    await _initGoogleSignIn();
+
+    final GoogleSignInAccount googleUser =
+        await _googleSignIn.authenticate();
+
+    final GoogleSignInAuthentication googleAuth =
+        googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+    );
+
+    final userCredential =
+        await _auth.signInWithCredential(credential);
+
+    final user = userCredential.user;
+
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set({
+        'name': user.displayName ?? '',
+        'email': user.email ?? '',
+        'uid': user.uid,
+        'photoUrl': user.photoURL ?? '',
+        'provider': 'google',
+        'createdAt': DateTime.now().toIso8601String(),
+      }, SetOptions(merge: true));
+
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+          (route) => false,
+        );
+      }
+    }
+  } catch (e) {
+    debugPrint('Google sign-in error: $e');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_getFriendlyError(e.toString())),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } finally {
+    if (mounted) setState(() => _isLoading = false);
+  }
+}
+
   String _getFriendlyError(String error) {
     if (error.contains('user-not-found')) return 'No account found with this email';
     if (error.contains('wrong-password')) return 'Incorrect password';
     if (error.contains('invalid-email')) return 'Please enter a valid email';
     if (error.contains('too-many-requests')) return 'Too many attempts. Try again later';
     return 'Login failed. Please try again';
+    
   }
+    
+  String _getFriendlyGoogleError(String error) {
+  if (error.contains('network_error')) {
+    return 'Network error during Google sign-in';
+  }
+  if (error.contains('sign_in_canceled') || error.contains('canceled')) {
+    return 'Google sign-in was cancelled';
+  }
+  return 'Google sign-in failed. Please try again';
+}
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +396,7 @@ class _LoginState extends State<Login> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed:  _isLoading ? null : _signInWithGoogle,
                       icon: const Text(
                         'G',
                         style: TextStyle(

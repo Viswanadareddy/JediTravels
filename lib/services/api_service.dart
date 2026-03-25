@@ -19,7 +19,7 @@ class ApiService {
   required String checkIn,
   required String checkOut,
   required int guests,
-  int offerPercent = 0,
+  String offerCode = '',
 }) async {
   final response = await http.post(
     Uri.parse('${AppConfig.baseUrl}/pricing/quote'),
@@ -29,7 +29,7 @@ class ApiService {
       'check_in': checkIn,
       'check_out': checkOut,
       'guests': guests,
-      'offer_percent': offerPercent,
+      'offer_code': offerCode,
     }),
   );
 
@@ -52,6 +52,19 @@ class ApiService {
       throw Exception('Failed to load hotels');
     }
   }
+
+  Future<List<dynamic>> getOffers() async {
+  final response = await http.get(
+    Uri.parse('${AppConfig.baseUrl}/offers'),
+    headers: await _headers(),
+  );
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Failed to load offers');
+  }
+}
 
   Future<Map<String, dynamic>> createBooking({
     required int hotelId,

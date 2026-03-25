@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'constants.dart';
 import 'datetime_picker_widget.dart';
 import 'services/api_service.dart';
+import 'package:flutter/services.dart';
 
 class PaymentsPage extends StatefulWidget {
   const PaymentsPage({
@@ -29,8 +30,8 @@ class _PaymentsPageState extends State<PaymentsPage> {
    final TextEditingController _guestsController =
       TextEditingController(text: '1');
 
-  final TextEditingController _offerPercentController =
-      TextEditingController(text: '0');
+  final TextEditingController _offerCodeController =
+      TextEditingController();
 
   DateTime? checkInDateTime;
   DateTime? checkOutDateTime;
@@ -56,7 +57,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
   @override
   void dispose() {
     _guestsController.dispose();
-  _offerPercentController.dispose();
+  _offerCodeController.dispose();
     razerPay.clear();
     super.dispose();
   }
@@ -73,8 +74,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
   }
 
   final int guests = int.tryParse(_guestsController.text.trim()) ?? 1;
-  final int offerPercent =
-      int.tryParse(_offerPercentController.text.trim()) ?? 0;
+ String offerCode = _offerCodeController.text.trim().toUpperCase();
 
   setState(() {
     _isLoadingQuote = true;
@@ -86,7 +86,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
       checkIn: DateFormat('yyyy-MM-dd').format(checkInDateTime!),
       checkOut: DateFormat('yyyy-MM-dd').format(checkOutDateTime!),
       guests: guests,
-      offerPercent: offerPercent,
+      offerCode: offerCode,
     );
 
     setState(() {
@@ -101,6 +101,22 @@ class _PaymentsPageState extends State<PaymentsPage> {
       _isLoadingQuote = false;
     });
   }
+}
+
+Future<void> _pasteOfferCode() async {
+  final data = await Clipboard.getData('text/plain');
+  final pasted = data?.text?.trim() ?? '';
+
+  if (pasted.isEmpty) {
+    showMessage('Clipboard is empty');
+    return;
+  }
+
+  setState(() {
+    _offerCodeController.text = pasted;
+  });
+
+  showMessage('Offer code pasted');
 }
 
 double _amountToPay() {
@@ -212,6 +228,11 @@ Widget _quoteSection() {
           _quoteRow('Base/night', '\$${_quote!['base_price_per_night']}'),
           _quoteRow('Subtotal', '\$${_quote!['subtotal']}'),
           _quoteRow('Extra guest charge', '\$${_quote!['extra_guest_charge']}'),
+          if (_quote!['offer_code'] != null)
+             _quoteRow('Offer Code', _quote!['offer_code'].toString()),
+
+           if (_quote!['offer_title'] != null)
+             _quoteRow('Offer', _quote!['offer_title'].toString()),
           _quoteRow('Discount', '- \$${_quote!['discount_amount']}'),
           const Divider(),
           _quoteRow('Final total', '\$${_quote!['final_total']}', isBold: true),
@@ -310,13 +331,23 @@ Widget _quoteRow(String label, String value, {bool isBold = false}) {
 ),
 Padding(
   padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-  child: TextField(
-    controller: _offerPercentController,
-    keyboardType: TextInputType.number,
-    decoration: const InputDecoration(
-      labelText: 'Offer Percent (temporary)',
-      border: OutlineInputBorder(),
-    ),
+  child: Row(
+    children: [
+      Expanded(
+        child: TextField(
+          controller: _offerCodeController,
+          decoration: const InputDecoration(
+            labelText: 'Offer Code',
+            border: OutlineInputBorder(),
+          ),
+        ),
+      ),
+      const SizedBox(width: 10),
+      ElevatedButton(
+        onPressed: _pasteOfferCode,
+        child: const Text('Paste'),
+      ),
+    ],
   ),
 ),
 Center(
