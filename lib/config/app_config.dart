@@ -1,5 +1,12 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class AppConfig {
-  static const String baseUrl = 'http://10.0.2.2:5000'; 
+  static String get baseUrl{
+    if (kIsWeb){
+      return 'http://127.0.0.1:5000';
+    }
+    return 'http://10.0.2.2:5000';
+  } 
   // Android emulator -> local backend
   // later replace with deployed backend URL
 

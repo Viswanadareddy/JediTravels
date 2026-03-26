@@ -7,6 +7,8 @@ import 'constants.dart';
 import 'datetime_picker_widget.dart';
 import 'services/api_service.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 
 class PaymentsPage extends StatefulWidget {
   const PaymentsPage({
@@ -128,7 +130,10 @@ double _amountToPay() {
 }
 void openCheckout() {
   final parsedPrice = _amountToPay();
-
+if (kIsWeb) {
+  showMessage('Web payment is not enabled yet. Please use the mobile app.');
+  return;
+}
   if (parsedPrice <= 0) {
     debugPrint('Invalid payable amount: $parsedPrice');
     showMessage('Invalid payable amount');
